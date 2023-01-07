@@ -1,19 +1,13 @@
 # <img src="public/icons/icon_48.png" width="45" align="left"> Akizuki Chrome Ext
 
-My Chrome Extension
-
-## Features
-
-- Feature 1
-- Feature 2
+秋月電子買い物リスト
 
 ## Install
 
-[**Chrome** extension]() <!-- TODO: Add chrome extension link inside parenthesis -->
-
-## Contribution
-
-Suggestions and pull requests are welcomed!.
+* zipでダウンロードして展開するかgitでclone
+* Chromeの「拡張機能を管理」を開く
+* デベロッパーモードをオン
+* 「パッケージ化されていない拡張機能を読み込む」を押し、buildフォルダーを選択
 
 ---
 
