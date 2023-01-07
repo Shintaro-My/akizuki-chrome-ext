@@ -1,21 +1,50 @@
-'use strict';
+import { abortableFetch, abortableFetchList } from './abortableFetch.js'
 
-// With background scripts you can communicate with popup
-// and contentScript files.
-// For more information on background script,
-// See https://developer.chrome.com/extensions/background_pages
+const idreg = /\/catalog\/g\/g([MKPBRSICT]-\d{5})/;
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'GREETINGS') {
-    const message = `Hi ${
-      sender.tab ? 'Con' : 'Pop'
-    }, my name is Bac. I am from Background. It's great to hear from you.`;
 
-    // Log message coming from the `request` parameter
-    console.log(request.payload.message);
-    // Send a response message
-    sendResponse({
-      message,
-    });
-  }
+chrome.runtime.onInstalled.addListener(({}) => {
+    chrome.storage.local.set({ ['__akizuki_current_item_id']: '' });
+    //chrome.storage.local.set({ ['__akizuki_my_item_list']: [] });
 });
+
+
+chrome.contextMenus.create({
+    id: '__akizuki_right_click',
+    title: 'リンク先を買い物リストに追加する',
+    contexts: ['link'],
+}, () => chrome.runtime.lastError);
+chrome.contextMenus.onClicked.addListener(async item => {
+    console.log(item);
+    if(item.menuItemId == '__akizuki_right_click') {
+
+        const id = item.linkUrl.match(idreg)?.[1];
+        if(!id) return null;
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        chrome.tabs.sendMessage(tab.id,
+            {
+                name: 'add_item',
+                payload: { id },
+            }
+          );
+    }
+});
+
+const callback = x => {
+    chrome.tabs.get(x?.tabId || x, tab => {
+        const { url } = tab;
+        const _id = url.match(idreg)?.[1];
+        chrome.storage.local.set({
+            '__akizuki_current_item_id': _id || ''
+        });
+    })
+    /*
+    chrome.tabs.query({ active: true, currentWindow: true }, tab => {
+        if(!tab.length) return;
+    });
+    */
+};
+
+chrome.tabs.onActivated.addListener(callback);
+chrome.tabs.onUpdated.addListener(callback);
+//chrome.windows.onFocusChanged.addListener(callback);

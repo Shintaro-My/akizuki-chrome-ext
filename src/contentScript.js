@@ -1,43 +1,50 @@
-'use strict';
+import { addItem } from './util.js';
 
-// Content script file will run in the context of web page.
-// With content script you can manipulate the web pages using
-// Document Object Model (DOM).
-// You can also pass information to the parent extension.
+const style = document.createElement('style');
+style.innerHTML = `
+.__akizuki_info_box {
+    animation: __akizuki_info_box_close_animation .35s ease-in 1s forwards;
+    position: fixed;
+    pointer-events: none;
+    user-select: none;
+    top: 1em;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    background: #ffcc99;
+    border: 1px solid #aaa;
+    box-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 0 9px #fff;
+    color: #733;
+    font-size: 1.5em;
+    opacity: 1;
+    padding: .5em;
+    text-align: center;
+    width: 35%;
+    max-width: 190px;
+}
+@keyframes __akizuki_info_box_close_animation {
+  0%,30% { opacity: 1; }
+  100%   { opacity: 0; }
+}
+`;
+document.head.appendChild(style);
 
-// We execute this script by making an entry in manifest.json file
-// under `content_scripts` property
-
-// For more information on Content Scripts,
-// See https://developer.chrome.com/extensions/content_scripts
-
-// Log `title` of current active web page
-const pageTitle = document.head.getElementsByTagName('title')[0].innerHTML;
-console.log(
-  `Page title is: '${pageTitle}' - evaluated by Chrome extension's 'contentScript.js' file`
-);
-
-// Communicate with background file by sending a message
-chrome.runtime.sendMessage(
-  {
-    type: 'GREETINGS',
-    payload: {
-      message: 'Hello, my name is Con. I am from ContentScript.',
-    },
-  },
-  (response) => {
-    console.log(response.message);
-  }
-);
+const info = document.createElement('div');
+info.classList.add('__akizuki_info_box', '__akizuki_close', '__akizuki_init');
 
 // Listen for message
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'COUNT') {
-    console.log(`Current count is ${request.payload.count}`);
-  }
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+    if(request.name == 'add_item') {
+        const { id } = request.payload;
+        await addItem(id);
+        console.log(id);
+        info.remove();
+        info.innerHTML = `${id}を追加`;
+        document.body.appendChild(info);
+    }
 
   // Send an empty response
   // See https://github.com/mozilla/webextension-polyfill/issues/130#issuecomment-531531890
-  sendResponse({});
-  return true;
+  //sendResponse({});
+  //return true;
 });
