@@ -21,20 +21,17 @@ chrome.contextMenus.onClicked.addListener(async item => {
         const id = item.linkUrl.match(idreg)?.[1];
         if(!id) return null;
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        const req = chrome.tabs.sendMessage(tab.id,
-            {
-                name: 'add_item',
-                payload: { id },
-            }
-        );
-        req.catch(console.log);
+        chrome.tabs.sendMessage(tab.id, {
+            name: 'add_item',
+            payload: { id },
+        }).catch(e => console.log(e));
     }
 });
 
 const callback = x => {
     chrome.tabs.get(x?.tabId || x, tab => {
         const { url } = tab;
-        const _id = url.match(idreg)?.[1];
+        const _id = url?.match(idreg)?.[1];
         chrome.storage.local.set({
             '__akizuki_current_item_id': _id || ''
         });
