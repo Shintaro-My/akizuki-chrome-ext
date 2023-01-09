@@ -21,12 +21,13 @@ chrome.contextMenus.onClicked.addListener(async item => {
         const id = item.linkUrl.match(idreg)?.[1];
         if(!id) return null;
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        chrome.tabs.sendMessage(tab.id,
+        const req = chrome.tabs.sendMessage(tab.id,
             {
                 name: 'add_item',
                 payload: { id },
             }
-          );
+        );
+        req.catch(console.log);
     }
 });
 
